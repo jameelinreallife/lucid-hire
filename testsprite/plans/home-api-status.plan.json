@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TestSprite/testsprite-cli/v0.15.0/schemas/plan.schema.json",
+  "projectId": "68fb134f-511b-4257-b979-c40e41a56557",
+  "type": "frontend",
+  "name": "Home page reports the API as online",
+  "planSteps": [
+    { "type": "action", "description": "Open the home page at /" },
+    { "type": "assertion", "description": "Verify that within 10 seconds the status element (data-testid=\"api-status\") shows the text \"API online\" and its data-state attribute is \"online\"" },
+    { "type": "assertion", "description": "Verify the status element does not show \"API unreachable\"" }
+  ]
+}

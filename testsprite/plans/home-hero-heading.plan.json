@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TestSprite/testsprite-cli/v0.15.0/schemas/plan.schema.json",
+  "projectId": "68fb134f-511b-4257-b979-c40e41a56557",
+  "type": "frontend",
+  "name": "Home page shows the product promise",
+  "planSteps": [
+    { "type": "action", "description": "Open the home page at /" },
+    { "type": "assertion", "description": "Verify the page title is \"LucidHire: CV screening for small hiring teams\"" },
+    { "type": "assertion", "description": "Verify the main heading (data-testid=\"hero-heading\") is visible and its text contains \"We read every CV.\" and \"You meet the best ones.\"" },
+    { "type": "assertion", "description": "Verify the header has a link named \"LucidHire home\" that points to /" }
+  ]
+}
