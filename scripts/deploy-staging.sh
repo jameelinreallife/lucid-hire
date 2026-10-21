@@ -8,7 +8,9 @@ cd "$(dirname "$0")/.."
 message="${WORKERS_CI_BRANCH:-local} ${WORKERS_CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 
 # The web Worker's service binding needs the API Worker, so the API goes first.
-(cd apps/api && pnpm exec cf deploy --mode staging --message "$message")
+# The Workers Builds trigger lives on the web Worker; its name and tag checks don't apply to the API.
+(cd apps/api && env -u WRANGLER_CI_MATCH_TAG -u WRANGLER_CI_OVERRIDE_NAME \
+	pnpm exec cf deploy --mode staging --message "$message")
 (cd apps/web && pnpm exec cf deploy --mode staging --message "$message")
 
 curl -fsS --retry 30 --retry-delay 5 --retry-all-errors --max-time 10 \
