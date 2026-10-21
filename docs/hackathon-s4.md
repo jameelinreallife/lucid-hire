@@ -316,8 +316,8 @@ against it.
 3. Paste a sample PR URL → **Detect Events**. TestSprite lists the check
    runs, workflow runs and deploy bot comments it found on that PR.
 4. **Pick the event that fires after the deployment is reachable.** Never
-   pick one that fires at build start. For us that is the
-   `Deploy staging` workflow run completing (§7).
+   pick one that fires at build start. For us that is the Workers Builds
+   check run for `lucid-hire-web-staging` completing (§7).
 5. Set the **Target URL pattern**. Placeholders: `{pr}`, `{branch}`,
    `{branch-slug}`, `{sha}`, `{short-sha}`. Ours is the fixed staging URL
    (§7). **(unverified)** Check that the portal accepts a pattern with no
@@ -502,7 +502,21 @@ So, using `cf` configuration modes (`--mode staging` and `--mode production` in 
 | `staging` | `lucid-hire-web-staging`, `lucid-hire-api-staging` | Its own D1, R2 bucket, Vectorize index, Queue, Workflow and DO namespace | `https://staging.lucidhire.io` (custom domain; the zone is on Cloudflare) |
 | `production` | `lucid-hire-web`, `lucid-hire-api` | Production resources | The cutover target is `www.lucidhire.io`. Until cutover, use a separate subdomain. |
 
-**GitHub Actions:**
+**Workers Builds (active deploy path):** GitHub Actions is unavailable on
+`jnzlab` (account billing lock), so Cloudflare Workers Builds deploys
+staging instead. Its GitHub App posts a check run on every PR commit.
+- Trigger `Deploy staging` sits on the `lucid-hire-web-staging` Worker. It
+  builds every branch except `main`, runs `pnpm check`, then
+  `scripts/deploy-staging.sh`. The script deploys the API, then web, then
+  waits for `/api/health` and the home page.
+- **That check run completing is the event the TestSprite PR trigger
+  listens for.** It goes green only once staging answers.
+- The build token is managed by Workers Builds (`cf builds tokens list`).
+  Inspect runs with `cf builds list` and `cf builds logs`.
+- Production has no trigger yet. Add one on `lucid-hire-web` for `main`
+  before the first production deploy.
+
+**GitHub Actions (kept for when Actions is available again):**
 - `deploy-staging.yml` runs `on: pull_request` (opened, synchronize,
   reopened, ready_for_review). It installs, builds, applies D1 migrations
   to staging, and deploys both staging Workers. Use
