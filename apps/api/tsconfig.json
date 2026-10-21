@@ -17,6 +17,7 @@
 	"include": [
 		"src",
 		"cloudflare.config.ts",
+		"vitest.config.ts",
 		".cloudflare/types"
 	]
 }
