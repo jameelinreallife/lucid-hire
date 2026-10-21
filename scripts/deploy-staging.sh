@@ -13,7 +13,9 @@ message="${WORKERS_CI_BRANCH:-local} ${WORKERS_CI_COMMIT_SHA:-$(git rev-parse HE
 	pnpm exec cf deploy --mode staging --message "$message")
 (cd apps/web && pnpm exec cf deploy --mode staging --message "$message")
 
-curl -fsS --retry 30 --retry-delay 5 --retry-all-errors --max-time 10 \
-	https://staging.lucidhire.io/api/health | tee /dev/stderr | grep -q '"ok":true'
+health=$(curl -fsS --retry 30 --retry-delay 5 --retry-all-errors --max-time 10 \
+	https://staging.lucidhire.io/api/health)
+echo "health: $health"
+grep -q '"ok":true' <<<"$health"
 curl -fsS --retry 10 --retry-delay 3 --retry-all-errors --max-time 10 -o /dev/null \
 	-w 'home page: %{http_code}\n' https://staging.lucidhire.io/
