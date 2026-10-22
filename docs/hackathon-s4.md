@@ -1,8 +1,9 @@
 # TestSprite Hackathon Season 4: rules for this repo
 
-This file is binding for every coding agent working in `jnzlab/lucid-hire`.
-Read it before writing code, opening a PR, or touching CI. Where it says
-**MUST** or **NEVER**, there are no exceptions without the owner's say-so.
+This file is binding for every coding agent working in
+`jameelinreallife/lucid-hire`. Read it before writing code, opening a PR, or
+touching CI. Where it says **MUST** or **NEVER**, there are no exceptions
+without the owner's say-so.
 
 Researched 2026-10-21 from the official sources listed at the end. Items
 marked **(unverified)** were not stated in any doc; confirm them before
@@ -173,7 +174,7 @@ beats a bigger one that is half broken.
 
 ## 3. Submission checklist (all required unless marked optional)
 
-**Repo (`jnzlab/lucid-hire`, public):**
+**Repo (`jameelinreallife/lucid-hire`, public):**
 - [ ] Source code
 - [ ] `README.md` covering what the app is, the **live public URL**, and
       **what the TestSprite suite covers**: a list of flows and tests
@@ -310,7 +311,7 @@ against it.
 
 **Setup (done once, by the owner in the portal):**
 1. Workspace Settings → Connections → Integrations → GitHub → **Connect** →
-   pick `jnzlab` → grant repo access → **Install & Authorize**.
+   pick `jameelinreallife` → grant repo access → **Install & Authorize**.
 2. Project → **GitHub Action** tab → **Add Trigger** → **Pull Request**.
    Optionally add a **Push to Branch** trigger for `main` too.
 3. Paste a sample PR URL → **Detect Events**. TestSprite lists the check
@@ -502,13 +503,17 @@ So, using `cf` configuration modes (`--mode staging` and `--mode production` in 
 | `staging` | `lucid-hire-web-staging`, `lucid-hire-api-staging` | Its own D1, R2 bucket, Vectorize index, Queue, Workflow and DO namespace | `https://staging.lucidhire.io` (custom domain; the zone is on Cloudflare) |
 | `production` | `lucid-hire-web`, `lucid-hire-api` | Production resources | The cutover target is `www.lucidhire.io`. Until cutover, use a separate subdomain. |
 
-**Workers Builds (active deploy path):** GitHub Actions is unavailable on
-`jnzlab` (account billing lock), so Cloudflare Workers Builds deploys
-staging instead. Its GitHub App posts a check run on every PR commit.
-- Trigger `Deploy staging` sits on the `lucid-hire-web-staging` Worker. It
-  builds every branch except `main`, runs `pnpm check`, then
+**Workers Builds (active deploy path):** the repo moved from `jnzlab` to
+`jameelinreallife` after a billing lock on the old account, and Cloudflare
+Workers Builds deploys staging from the new repo. Its GitHub App posts a
+check run on every PR commit.
+- Trigger `Deploy staging (PR branches)` sits on the `lucid-hire-web-staging`
+  Worker. It builds every branch except `main`, runs `pnpm check`, then
   `scripts/deploy-staging.sh`. The script deploys the API, then web, then
   waits for `/api/health` and the home page.
+- Connecting a repo in the dashboard also creates a default trigger on the
+  production branch. Delete it: its `npx wrangler deploy` has no config to
+  run against at the repo root.
 - **That check run completing is the event the TestSprite PR trigger
   listens for.** It goes green only once staging answers.
 - The build token is managed by Workers Builds (`cf builds tokens list`).
@@ -516,7 +521,7 @@ staging instead. Its GitHub App posts a check run on every PR commit.
 - Production has no trigger yet. Add one on `lucid-hire-web` for `main`
   before the first production deploy.
 
-**GitHub Actions (kept for when Actions is available again):**
+**GitHub Actions (not wired up: the repo has no Cloudflare secrets yet):**
 - `deploy-staging.yml` runs `on: pull_request` (opened, synchronize,
   reopened, ready_for_review). It installs, builds, applies D1 migrations
   to staging, and deploys both staging Workers. Use
