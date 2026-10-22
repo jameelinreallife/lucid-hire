@@ -521,23 +521,22 @@ check run on every PR commit.
 - Production has no trigger yet. Add one on `lucid-hire-web` for `main`
   before the first production deploy.
 
-**GitHub Actions (not wired up: the repo has no Cloudflare secrets yet):**
-- `deploy-staging.yml` runs `on: pull_request` (opened, synchronize,
-  reopened, ready_for_review). It installs, builds, applies D1 migrations
-  to staging, and deploys both staging Workers. Use
-  `concurrency: { group: staging, cancel-in-progress: false }` so PRs deploy
-  one at a time.
-  - It finishes only **after** the staging URL answers 200; add a curl
-    health check against `/api/health`.
-  - **This workflow run completing is the event the TestSprite PR trigger
-    listens for.**
-- `deploy-production.yml` runs `on: push` to `main`.
-- Secrets live in GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`,
-  `CLOUDFLARE_ACCOUNT_ID`, and so on) and in `cf workers secrets update` per
-  environment. Never in files.
+- Keep **Worker Previews off** on the staging Worker
+  (`previews_enabled: false`). Preview builds run `npx wrangler preview`,
+  fail without a wrangler config, and report under the same check name as
+  the staging deploy. Turning previews off deletes the non-production
+  triggers, so recreate `Deploy staging (PR branches)` afterwards.
+- A build started with `cf builds create` deploys but posts no GitHub check
+  run. Push a commit to get a fresh check on the PR.
+- Secrets live in `cf workers secrets update` per environment. Never in
+  files.
 - Only one PR can be tested against staging at a time. That is acceptable
   for a solo hackathon. Don't "fix" it with per-PR previews for the reasons
   above.
+
+**GitHub Actions:** no deploy workflows. Workers Builds is the only deploy
+path, so there is no second deploy racing it and no Cloudflare token stored
+in GitHub.
 
 **Optional extra gate:** a GitHub Actions job may also run
 `testsprite ci run --project <id> --env staging --target-url <staging-url>`
